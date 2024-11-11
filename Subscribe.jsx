@@ -17,7 +17,6 @@ const Subscribe = () => {
     }
 
     try {
-      // Make a POST request to the Express backend to send the email
       const response = await fetch('http://localhost:5000/api/subscribe', {
         method: 'POST',
         headers: {
@@ -32,7 +31,7 @@ const Subscribe = () => {
 
       if (response.ok) {
         alert('Subscription successful!');
-        navigate('/thank-you');  // Redirect after successful subscription
+        navigate('/thank-you'); 
       } else {
         alert('Error subscribing. Please try again later.');
       }
