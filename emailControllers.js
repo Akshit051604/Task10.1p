@@ -1,56 +1,47 @@
-const express = require('express')
-const bodyparser = require('body-parser')
-const https = require('https')
-const e = require('express')
-const app = express()
+const express = require('express');
+const bodyParser = require('body-parser');
+const app = express();
+const sgMail = require('@sendgrid/mail');
 
-app.use(bodyparser.urlencoded({extended:true}))
-app.use(express.static('public'))
+// Replace with your SendGrid API key
+sgMail.setApiKey('SG.zXjquQnFQfqoiqWJzszs6Q.67zQ4SSqh-LBNxnzmoW_azB9GwqLlTQWHPliO1ztaaA');
 
-app.listen(8080, function(request, response){
-console.log('port is running on 8080')
-})
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
-app.get('/', function(request, response)
-{
-    response.sendFile(__dirname + '/index.html')
-})
+app.listen(8080, function () {
+    console.log('Server is running on port 8080');
+});
 
-app.post('/', function(request,response)
-{
+app.get('/', function (request, response) {
+    response.sendFile(__dirname + '/index.html');
+});
+
+app.post('/', function (request, response) {
     const fname = request.body.firstname;
     const lname = request.body.lastname;
     const email = request.body.gmail;
+
     console.log(fname, lname, email);
 
-    const apik = "0bd0dd8e22afe20e23971b89885f9694-us22";
-    const list_id = "58ec24c56e";
-    const url = "https://us22.api.mailchimp.com/3.0/lists/58ec24c56e";
+    const msg = {
+        to: email,
+        from: 'akshit4758.be23@chitkara.edu.in',  // Replace with your verified sender email
+        templateId: 'd-8554c5af18a8469d8edbd7ebb12e8702',  // Replace with your dynamic template ID
+        dynamic_template_data: {
+            firstname: fname,
+            lastname: lname
+        },
+    };
 
-    const options = {
-        method:"POST",
-        auth:"ak:0bd0dd8e22afe20e23971b89885f9694-us22"
-    }
-    const data= {
-        members: [{email_addres:email,
-        status:"subscribed",
-        merge_field: {
-            FNAME:fname,
-            LNAME:lname
-        }
-    }]
-    }
-    const jsonData = JSON.stringify(data)    
-
-    const req= https.request(url, options, function(response)
-    {
-        response.on("data", function(data)
-    {
-        console.log(jsonData.parse(data))
-    })
-    })
-
-    req.write(jsonData)
-    req.end()
-    console.log(fname, lname, email)
-})
+    sgMail
+        .send(msg)
+        .then(() => {
+            console.log('Email sent');
+            response.send('Success! Email has been sent.');
+        })
+        .catch((error) => {
+            console.error(error);
+            response.send('Error sending email.');
+        });
+});
